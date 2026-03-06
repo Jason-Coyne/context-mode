@@ -184,6 +184,16 @@ export function writeSessionEventsFile(events, eventsPath) {
     lines.push("");
   }
 
+  if (grouped.plan?.length > 0) {
+    const lastPlan = grouped.plan[grouped.plan.length - 1];
+    const isActive = lastPlan.type === "plan_enter";
+    lines.push("## Plan Mode");
+    lines.push("");
+    lines.push(`- Status: ${isActive ? "active (in planning)" : "completed (plan executed)"}`);
+    for (const ev of grouped.plan) lines.push(`- ${ev.data}`);
+    lines.push("");
+  }
+
   if (lastPrompt) {
     lines.push("## Last User Prompt");
     lines.push("");
@@ -367,6 +377,18 @@ export function buildSessionDirective(source, eventMeta) {
   if (grouped.role?.length > 0) {
     block += `\n## User Role`;
     block += `\n${grouped.role[grouped.role.length - 1].data}`;
+    block += `\n`;
+  }
+
+  // 14. Plan mode state — critical for preventing stale plan restoration
+  if (grouped.plan?.length > 0) {
+    const lastPlan = grouped.plan[grouped.plan.length - 1];
+    const isActive = lastPlan.type === "plan_enter";
+    block += `\n## Plan Mode`;
+    block += `\n- Status: ${isActive ? "ACTIVE (in planning phase)" : "COMPLETED (plan was executed)"}`;
+    if (!isActive) {
+      block += `\n- The plan has been executed. Do NOT re-enter plan mode or re-propose the same plan.`;
+    }
     block += `\n`;
   }
 

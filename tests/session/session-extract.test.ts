@@ -308,6 +308,73 @@ describe("Task Events", () => {
 });
 
 // ════════════════════════════════════════════
+// SLICE 6B: PLAN MODE EVENT EXTRACTION
+// ════════════════════════════════════════════
+
+describe("Plan Mode Events", () => {
+  test("extracts plan_enter from EnterPlanMode", () => {
+    const input = {
+      tool_name: "EnterPlanMode",
+      tool_input: {},
+      tool_response: "",
+    };
+
+    const events = extractEvents(input);
+    const planEvents = events.filter(e => e.category === "plan");
+    assert.equal(planEvents.length, 1);
+    assert.equal(planEvents[0].type, "plan_enter");
+    assert.equal(planEvents[0].data, "entered plan mode");
+    assert.equal(planEvents[0].priority, 2);
+  });
+
+  test("extracts plan_exit from ExitPlanMode", () => {
+    const input = {
+      tool_name: "ExitPlanMode",
+      tool_input: {},
+      tool_response: "",
+    };
+
+    const events = extractEvents(input);
+    const planEvents = events.filter(e => e.category === "plan");
+    assert.equal(planEvents.length, 1);
+    assert.equal(planEvents[0].type, "plan_exit");
+    assert.equal(planEvents[0].data, "exited plan mode");
+  });
+
+  test("extracts plan_exit with allowedPrompts from ExitPlanMode", () => {
+    const input = {
+      tool_name: "ExitPlanMode",
+      tool_input: {
+        allowedPrompts: [
+          { tool: "Bash", prompt: "run tests" },
+          { tool: "Bash", prompt: "install dependencies" },
+        ],
+      },
+      tool_response: "",
+    };
+
+    const events = extractEvents(input);
+    const planEvents = events.filter(e => e.category === "plan");
+    assert.equal(planEvents.length, 1);
+    assert.equal(planEvents[0].type, "plan_exit");
+    assert.ok(planEvents[0].data.includes("run tests"));
+    assert.ok(planEvents[0].data.includes("install dependencies"));
+  });
+
+  test("ignores non-plan tools", () => {
+    const input = {
+      tool_name: "Bash",
+      tool_input: { command: "echo hello" },
+      tool_response: "hello",
+    };
+
+    const events = extractEvents(input);
+    const planEvents = events.filter(e => e.category === "plan");
+    assert.equal(planEvents.length, 0);
+  });
+});
+
+// ════════════════════════════════════════════
 // SLICE 7: DECISION EVENT EXTRACTION (user messages)
 // ════════════════════════════════════════════
 

@@ -258,6 +258,39 @@ function extractTask(input: HookInput): SessionEvent[] {
 }
 
 /**
+ * Category 15: plan
+ * EnterPlanMode / ExitPlanMode tool calls — tracks plan lifecycle.
+ */
+function extractPlan(input: HookInput): SessionEvent[] {
+  if (input.tool_name === "EnterPlanMode") {
+    return [{
+      type: "plan_enter",
+      category: "plan",
+      data: "entered plan mode",
+      priority: 2,
+    }];
+  }
+
+  if (input.tool_name === "ExitPlanMode") {
+    const prompts = input.tool_input["allowedPrompts"];
+    const detail = Array.isArray(prompts) && prompts.length > 0
+      ? `exited plan mode (allowed: ${truncateAny(prompts.map((p: unknown) => {
+          if (typeof p === "object" && p !== null && "prompt" in p) return String((p as Record<string, unknown>).prompt);
+          return String(p);
+        }).join(", "), 200)})`
+      : "exited plan mode";
+    return [{
+      type: "plan_exit",
+      category: "plan",
+      data: truncate(detail),
+      priority: 2,
+    }];
+  }
+
+  return [];
+}
+
+/**
  * Category 8: env
  * Environment setup commands in Bash: venv, export, nvm, pyenv, conda, rbenv.
  */
@@ -468,6 +501,7 @@ export function extractEvents(input: HookInput): SessionEvent[] {
 
     // Tool-specific extractors
     events.push(...extractTask(input));
+    events.push(...extractPlan(input));
     events.push(...extractSkill(input));
     events.push(...extractSubagent(input));
     events.push(...extractMcp(input));

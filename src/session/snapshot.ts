@@ -312,6 +312,7 @@ export function buildResumeSnapshot(
   const dataEvents: StoredEvent[] = [];
   const intentEvents: StoredEvent[] = [];
   const mcpEvents: StoredEvent[] = [];
+  const planEvents: StoredEvent[] = [];
 
   for (const ev of events) {
     switch (ev.category) {
@@ -329,6 +330,7 @@ export function buildResumeSnapshot(
       case "data": dataEvents.push(ev); break;
       case "intent": intentEvents.push(ev); break;
       case "mcp": mcpEvents.push(ev); break;
+      case "plan": planEvents.push(ev); break;
     }
   }
 
@@ -357,6 +359,13 @@ export function buildResumeSnapshot(
   const completedSubagents = subagentEvents.filter(e => e.type === "subagent_completed");
   const subagentsP2 = renderSubagents(completedSubagents);
   if (subagentsP2) p2Sections.push(subagentsP2);
+  // Plan mode state — show if plan is active (last event is plan_enter)
+  if (planEvents.length > 0) {
+    const lastPlan = planEvents[planEvents.length - 1];
+    if (lastPlan.type === "plan_enter") {
+      p2Sections.push(`  <plan_mode status="active" />`);
+    }
+  }
 
   // P3-P4 sections (15% budget): intent, mcp_tools, launched subagents
   const p3Sections: string[] = [];
