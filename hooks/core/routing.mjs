@@ -49,7 +49,7 @@ export async function initSecurity(buildDir) {
  * - Gemini CLI: https://github.com/google-gemini/gemini-cli (run_shell_command, read_file, grep_search, web_fetch, activate_skill)
  * - OpenCode:   https://github.com/opencode-ai/opencode (bash, view, grep, fetch, agent)
  * - Codex CLI:  https://github.com/openai/codex (shell, read_file, grep_files, container.exec)
- * - VS Code Copilot: tool names TBD — uses empty matcher until confirmed
+ * - VS Code Copilot: run_in_terminal (command field), read_file, run_vs_code_task
  */
 const TOOL_ALIASES = {
   // Gemini CLI
@@ -77,6 +77,8 @@ const TOOL_ALIASES = {
   "mcp_web_fetch": "WebFetch",
   "mcp_fetch_tool": "WebFetch",
   "Shell": "Bash",
+  // VS Code Copilot
+  "run_in_terminal": "Bash",
 };
 
 /**
