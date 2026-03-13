@@ -63,8 +63,8 @@ function assertDeny(result: HookResult, substringInReason: string) {
   assert.ok(hso, "Expected hookSpecificOutput in response");
   assert.equal(hso.permissionDecision, "deny", `Expected permissionDecision=deny`);
   assert.ok(
-    hso.reason.includes(substringInReason),
-    `Expected reason to contain "${substringInReason}", got: ${hso.reason}`,
+    hso.permissionDecisionReason.includes(substringInReason),
+    `Expected permissionDecisionReason to contain "${substringInReason}", got: ${hso.permissionDecisionReason}`,
   );
 }
 
@@ -166,11 +166,11 @@ describe("WebFetch", () => {
     assertDeny(result, "fetch_and_index");
     const parsed = JSON.parse(result.stdout);
     assert.ok(
-      parsed.hookSpecificOutput.reason.includes("https://docs.example.com/api"),
+      parsed.hookSpecificOutput.permissionDecisionReason.includes("https://docs.example.com/api"),
       "Expected original URL in reason",
     );
     assert.ok(
-      parsed.hookSpecificOutput.reason.includes("Do NOT use curl"),
+      parsed.hookSpecificOutput.permissionDecisionReason.includes("Do NOT use curl"),
       "Expected curl warning in reason",
     );
   });
@@ -366,7 +366,7 @@ describe("Security Policy Enforcement", () => {
     assert.equal(result.exitCode, 0);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.hookSpecificOutput.permissionDecision, "deny");
-    assert.ok(parsed.hookSpecificOutput.reason.includes("deny pattern"));
+    assert.ok(parsed.hookSpecificOutput.permissionDecisionReason.includes("deny pattern"));
   });
 
   test("Security: Bash + git allowed, falls through to Stage 2", () => {
@@ -421,7 +421,7 @@ describe("Security Policy Enforcement", () => {
     assert.equal(result.exitCode, 0);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.hookSpecificOutput.permissionDecision, "deny");
-    assert.ok(parsed.hookSpecificOutput.reason.includes("Read deny pattern"));
+    assert.ok(parsed.hookSpecificOutput.permissionDecisionReason.includes("Read deny pattern"));
   });
 
   test("Security: MCP execute_file + safe path passthrough", () => {
@@ -528,7 +528,7 @@ describe("Plugin Tool Name Format in ROUTING_BLOCK", () => {
     const result = runHook({ tool_name: "WebFetch", tool_input: { url: "https://example.com" } });
     assert.equal(result.exitCode, 0);
     const parsed = JSON.parse(result.stdout);
-    const reason = parsed.hookSpecificOutput.reason;
+    const reason = parsed.hookSpecificOutput.permissionDecisionReason;
     assert.ok(reason.includes(PLUGIN_PREFIX + "ctx_fetch_and_index"), "Expected plugin-format ctx_fetch_and_index in WebFetch deny");
     assert.ok(!reason.includes(SHORT_PREFIX + "ctx_fetch_and_index"), "WebFetch deny must not contain short-form");
   });
