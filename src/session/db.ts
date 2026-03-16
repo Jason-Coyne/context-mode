@@ -203,6 +203,7 @@ export class SessionDB extends SQLiteBase {
         consumed INTEGER NOT NULL DEFAULT 0
       );
     `);
+
   }
 
   protected prepareStatements(): void {
@@ -290,6 +291,7 @@ export class SessionDB extends SQLiteBase {
     // ── Cleanup ──
     p(S.getOldSessions,
       `SELECT session_id FROM session_meta WHERE started_at < datetime('now', ? || ' days')`);
+
   }
 
   // ═══════════════════════════════════════════
